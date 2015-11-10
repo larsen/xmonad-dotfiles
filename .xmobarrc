@@ -25,6 +25,6 @@ Config { font = "-*-fixed-*-*-*-*-14-*-*-*-*-*-*-*"
                     --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
                     , Run Date           "<fc=#ABABAB>%F (%a) %T</fc>" "date" 10
                     ]
-       , position = TopW L 100
+       , position = TopW L 90
        , template = "%StdinReader% | %cpu% | %memory% | %dynnetwork% }{ %date%"
        }
