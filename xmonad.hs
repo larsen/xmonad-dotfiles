@@ -21,8 +21,7 @@ manageScratchpad = scratchpadManageHook (W.RationalRect l t w h)
         t = 0.1 
         l = 0.1
 
-myUrgencyHook = dzenUrgencyHook {
-  args = ["-bg", "darkred", "-fg", "grey80", "-xs", "1"] }
+myUrgencyHook = NoUrgencyHook
 
 myManageHook = manageDocks
   <+> manageScratchpad
@@ -30,7 +29,7 @@ myManageHook = manageDocks
 
 myTerminal = "urxvt -bg black"
 -- myTerminal = "mate-terminal"
-myFont = "Droid Sans Mono-16"
+myFont = "Inconsolata-16"
 
 myGSConfig = defaultGSConfig { gs_cellwidth = 250 }
 
@@ -42,7 +41,15 @@ main = do
     , layoutHook = avoidStruts $ spacing 2 $ smartBorders $ layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
-      , ppTitle = xmobarColor "grey" "" . shorten 50
+      , ppTitle = xmobarColor "grey" "" . shorten 25
+      , ppUrgent = xmobarColor "red" ""
+      , ppLayout = (\layout -> case layout of
+                                 "Spacing 2 Tall"        -> "[|]"
+                                 "Spacing 2 Mirror Tall" -> "[-]"
+                                 "Spacing 2 Tabbed"      -> "[_]"
+                                 "Spacing 2 Full"        -> "[ ]"
+                                 _                       -> layout
+                                 )           
       }
     , terminal = myTerminal
     , borderWidth = 1
