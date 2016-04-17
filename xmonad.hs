@@ -5,6 +5,7 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Actions.CycleWS
 import XMonad.Actions.GridSelect
 import XMonad.Actions.WindowBringer
+import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Util.Run (spawnPipe)
 import XMonad.Util.EZConfig (additionalKeys)
 import XMonad.Layout.Spacing
@@ -43,6 +44,7 @@ main = do
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor "grey" "" . shorten 25
       , ppUrgent = xmobarColor "red" ""
+      , ppSort = DO.getSortByOrder
       , ppLayout = (\layout -> case layout of
                                  "Spacing 2 Tall"        -> "[|]"
                                  "Spacing 2 Mirror Tall" -> "[-]"
@@ -60,15 +62,24 @@ main = do
     } `additionalKeys`
     [ ((mod4Mask .|. shiftMask, xK_z), spawn "xscreensaver-command -lock")
     , ((mod4Mask .|. shiftMask, xK_e), spawn "emacsclient -c")
-    , ((mod4Mask .|. shiftMask, xK_s), spawn "mate-screenshot -i")
+    , ((mod4Mask .|. shiftMask, xK_s), spawn "scrot -e 'mv $f ~/Pictures/screenshots/'")
     , ((mod4Mask,               xK_p), spawn "dmenu_run -fn 'Droid Sans Mono-16'")
-      -- CycleWS
-    , ((mod4Mask,               xK_Right),  nextWS)
-    , ((mod4Mask,               xK_Left),    prevWS)
+      -- 
+    , ((mod4Mask,               xK_Right), DO.moveTo Next HiddenNonEmptyWS)
+    , ((mod4Mask,               xK_Left),  DO.moveTo Prev HiddenNonEmptyWS)
       -- GridSelect
     , ((mod4Mask,               xK_g ), goToSelected myGSConfig)
       -- WindowBringer
     , ((mod4Mask,               xK_b ), gotoMenuArgs ["-fn", myFont])
     , ((mod4Mask .|. shiftMask, xK_b ), bringMenuArgs ["-fn", myFont])      
+
+    , ((mod4Mask .|. controlMask,  xK_Right), DO.swapWith Next NonEmptyWS)
+    , ((mod4Mask .|. controlMask,  xK_Left), DO.swapWith Prev NonEmptyWS)
+
+    -- , ("M-S-<R>",   DO.shiftTo Next HiddenNonEmptyWS)
+    -- , ("M-S-<L>",   DO.shiftTo Prev HiddenNonEmptyWS)
+    -- , ("M-<R>",     DO.moveTo Next HiddenNonEmptyWS)
+    -- , ("M-<L>",     DO.moveTo Prev HiddenNonEmptyWS)
+
     -- , ((mod4Mask .|. shiftMask, xK_s), scratchpadSpawnActionTerminal "")
     ]
