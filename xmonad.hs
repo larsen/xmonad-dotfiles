@@ -7,7 +7,7 @@ import XMonad.Actions.GridSelect
 import XMonad.Actions.WindowBringer
 import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Util.Run (spawnPipe)
-import XMonad.Util.EZConfig (additionalKeys)
+import XMonad.Util.EZConfig (additionalKeysP, additionalKeys)
 import XMonad.Layout.Spacing
 import XMonad.Layout.NoBorders
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
@@ -83,3 +83,9 @@ main = do
 
     -- , ((mod4Mask .|. shiftMask, xK_s), scratchpadSpawnActionTerminal "")
     ]
+    `additionalKeysP`
+      map (\ (key, event) -> (key, spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player." ++ event))
+        [ ("<XF86AudioPlay>", "PlayPause")
+        , ("<XF86AudioStop>", "Stop")
+        , ("<XF86AudioPrev>", "Previous")
+        , ("<XF86AudioNext>", "Next") ]
