@@ -25,6 +25,7 @@ manageScratchpad = scratchpadManageHook (W.RationalRect l t w h)
 myUrgencyHook = NoUrgencyHook
 
 myManageHook = manageDocks
+  <+> (className =? "X64" --> doFloat)
   <+> manageScratchpad
   <+> manageHook defaultConfig
 
