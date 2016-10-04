@@ -64,6 +64,7 @@ main = do
       ( [ ("M-S-z", spawn "xscreensaver-command -lock")
         , ("M-S-e", spawn "emacsclient -c")
         , ("M-S-s", spawn "scrot -e 'mv $f ~/Pictures/screenshots/'")
+        , ("M-S-w", spawn "scrot -s -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
         , ("M-p",   spawn "dmenu_run -fn 'Droid Sans Mono-16'")
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
