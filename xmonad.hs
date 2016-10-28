@@ -10,6 +10,7 @@ import XMonad.Util.Run (spawnPipe)
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Layout.Spacing
 import XMonad.Layout.NoBorders
+import XMonad.Layout.ThreeColumns
 import XMonad.Layout.ToggleLayouts
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import System.IO
@@ -51,6 +52,7 @@ myPPLayout l = case l of
 myLayouts = (Tall 1 (3/100) (80/100))
   ||| Mirror (Tall 1 (3/100) (60/100))
   ||| Full
+  ||| ThreeColMid 1 (3/100) (2/3)
 
 main = do
   xmproc <- spawnPipe "xmobar"
