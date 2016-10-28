@@ -10,6 +10,7 @@ import XMonad.Util.Run (spawnPipe)
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Layout.Spacing
 import XMonad.Layout.NoBorders
+import XMonad.Layout.ToggleLayouts
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import System.IO
 import qualified Data.Map as M
@@ -47,12 +48,16 @@ myPPLayout l = case l of
         spacingTabbed   = ("Spacing " ++ mySpacingString ++ " Mirror Tabbed")
         spacingFull     = ("Spacing " ++ mySpacingString ++ " Full")
 
+myLayouts = (Tall 1 (3/100) (80/100))
+  ||| Mirror (Tall 1 (3/100) (60/100))
+  ||| Full
+
 main = do
   xmproc <- spawnPipe "xmobar"
 
   xmonad $ withUrgencyHook myUrgencyHook $ defaultConfig 
     { manageHook = myManageHook
-    , layoutHook = avoidStruts $ spacing mySpacing $ smartBorders $ layoutHook defaultConfig
+    , layoutHook = avoidStruts $ spacing mySpacing $ smartBorders $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor "grey" "" . shorten 25
