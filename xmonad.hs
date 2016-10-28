@@ -31,27 +31,34 @@ myManageHook = manageDocks
 
 myTerminal = "urxvt -bg black"
 myFont = "Inconsolata-16"
+mySpacing = 8
 
 myGSConfig = defaultGSConfig { gs_cellwidth = 250 }
+
+myPPLayout l = case l of
+                 spacingTall   -> "[|]"
+                 spacingMirror -> "[-]"
+                 spacingTabbed -> "[_]"
+                 spacingFull   -> "[ ]"
+                 _             -> l
+  where mySpacingString = show mySpacing
+        spacingTall     = ("Spacing " ++ mySpacingString ++ " Tall")
+        spacingMirror   = ("Spacing " ++ mySpacingString ++ " Mirror Tall")
+        spacingTabbed   = ("Spacing " ++ mySpacingString ++ " Mirror Tabbed")
+        spacingFull     = ("Spacing " ++ mySpacingString ++ " Full")
 
 main = do
   xmproc <- spawnPipe "xmobar"
 
   xmonad $ withUrgencyHook myUrgencyHook $ defaultConfig 
     { manageHook = myManageHook
-    , layoutHook = avoidStruts $ spacing 0 $ smartBorders $ layoutHook defaultConfig
+    , layoutHook = avoidStruts $ spacing mySpacing $ smartBorders $ layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor "grey" "" . shorten 25
       , ppUrgent = xmobarColor "red" ""
       , ppSort = DO.getSortByOrder
-      , ppLayout = (\layout -> case layout of
-                                 "Spacing 2 Tall"        -> "[|]"
-                                 "Spacing 2 Mirror Tall" -> "[-]"
-                                 "Spacing 2 Tabbed"      -> "[_]"
-                                 "Spacing 2 Full"        -> "[ ]"
-                                 _                       -> layout
-                                 )           
+      , ppLayout = myPPLayout
       }
     , terminal = myTerminal
     , borderWidth = 1
