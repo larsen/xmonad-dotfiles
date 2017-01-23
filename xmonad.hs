@@ -2,6 +2,7 @@ import XMonad
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.UrgencyHook
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Actions.CycleWS
 import XMonad.Actions.GridSelect
 import XMonad.Actions.WindowBringer
@@ -57,7 +58,7 @@ myLayouts = (Tall 1 (3/100) (80/100))
 main = do
   xmproc <- spawnPipe "xmobar"
 
-  xmonad $ withUrgencyHook myUrgencyHook $ defaultConfig 
+  xmonad $ withUrgencyHook myUrgencyHook $ ewmh defaultConfig 
     { manageHook = myManageHook
     , layoutHook = avoidStruts $ spacing mySpacing $ smartBorders $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
