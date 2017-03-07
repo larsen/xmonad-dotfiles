@@ -20,10 +20,10 @@ import qualified XMonad.StackSet as W
 
 manageScratchpad :: ManageHook
 manageScratchpad = scratchpadManageHook (W.RationalRect l t w h)
-  where h = 0.1
-        w = 0.1
-        t = 0.1 
-        l = 0.1
+  where h = 0.9
+        w = 0.7
+        t = 0.05
+        l = 0.15
 
 myUrgencyHook = NoUrgencyHook
 
@@ -83,6 +83,7 @@ main = do
         , ("M-S-w", spawn "scrot -s -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
         , ("M-p",   spawn "dmenu_run -fn 'Droid Sans Mono-16'")
+        , ("M-o",   scratchpadSpawnActionTerminal myTerminal)
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
         , ("M-<L>", DO.moveTo Prev HiddenNonEmptyWS)
 
