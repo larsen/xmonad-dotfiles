@@ -14,6 +14,8 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.ToggleLayouts
 import XMonad.Layout.NoFrillsDecoration
+import XMonad.Layout.WindowNavigation
+import XMonad.Layout.SubLayouts
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import System.IO
 import qualified Data.Map as M
@@ -51,7 +53,8 @@ myPPLayout l = case l of
         spacingTabbed   = ("Spacing " ++ mySpacingString ++ " Mirror Tabbed")
         spacingFull     = ("Spacing " ++ mySpacingString ++ " Full")
 
-myLayouts = (Tall 1 (3/100) (80/100))
+myLayouts = windowNavigation $ subTabbed $
+  (Tall 1 (3/100) (80/100))
   ||| Mirror (Tall 1 (3/100) (60/100))
   ||| Full
   ||| ThreeColMid 1 (3/100) (2/3)
@@ -129,6 +132,14 @@ main = do
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
         , ("M-<L>", DO.moveTo Prev HiddenNonEmptyWS)
 
+        , ("M-C-h", sendMessage $ pullGroup L) -- h
+        , ("M-C-l", sendMessage $ pullGroup R) -- l
+        , ("M-C-k", sendMessage $ pullGroup U) -- k
+        , ("M-C-j", sendMessage $ pullGroup D) -- j
+        , ("M-C-u", withFocused (sendMessage . UnMerge))
+        , ("M-C-.", onGroup W.focusUp')
+        , ("M-C-,", onGroup W.focusDown')
+        
         -- GridSelect
         , ("M-g",   goToSelected myGSConfig)
         -- WindowBringer
