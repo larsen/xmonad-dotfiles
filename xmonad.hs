@@ -13,6 +13,7 @@ import XMonad.Layout.Spacing
 import XMonad.Layout.NoBorders
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.ToggleLayouts
+import XMonad.Layout.NoFrillsDecoration
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import System.IO
 import qualified Data.Map as M
@@ -55,12 +56,56 @@ myLayouts = (Tall 1 (3/100) (80/100))
   ||| Full
   ||| ThreeColMid 1 (3/100) (2/3)
 
+base03  = "#002b36"
+base02  = "#073642"
+base01  = "#586e75"
+base00  = "#657b83"
+base0   = "#839496"
+base1   = "#93a1a1"
+base2   = "#eee8d5"
+base3   = "#fdf6e3"
+yellow  = "#b58900"
+orange  = "#cb4b16"
+red     = "#dc322f"
+magenta = "#d33682"
+violet  = "#6c71c4"
+blue    = "#268bd2"
+cyan    = "#2aa198"
+green       = "#859900"
+
+active      = blue
+activeWarn  = red
+inactive    = base02
+focusColor  = blue
+unfocusColor = base02
+
+topbar      = 10
+
+topBarTheme = def
+    { fontName              = myFont
+    , inactiveBorderColor   = base03
+    , inactiveColor         = base03
+    , inactiveTextColor     = base03
+    , activeBorderColor     = active
+    , activeColor           = active
+    , activeTextColor       = active
+    , urgentBorderColor     = red
+    , urgentTextColor       = yellow
+    , decoHeight            = topbar
+    }
+
+addTopBar = noFrillsDeco shrinkText topBarTheme
+
 main = do
   xmproc <- spawnPipe "xmobar"
 
   xmonad $ withUrgencyHook myUrgencyHook $ ewmh defaultConfig 
     { manageHook = myManageHook
-    , layoutHook = avoidStruts $ spacing mySpacing $ smartBorders $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
+    , layoutHook = avoidStruts
+                   $ spacing mySpacing
+                   $ smartBorders
+                   $ addTopBar
+                   $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor "grey" "" . shorten 25
@@ -69,10 +114,7 @@ main = do
       , ppLayout = myPPLayout
       }
     , terminal = myTerminal
-    , borderWidth = 1
-    , normalBorderColor = "#cccccc"
-    , focusedBorderColor = "yellow"
-    -- , focusedBorderColor = "#ff0000"
+    , borderWidth = 0
     , modMask = mod4Mask
     }
     `additionalKeysP`
