@@ -17,13 +17,19 @@ import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.SubLayouts
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
+import XMonad.Util.NamedScratchpad
 import System.IO
 import qualified Data.Map as M
 import qualified XMonad.StackSet as W
 
-manageScratchpad :: ManageHook
-manageScratchpad = scratchpadManageHook (W.RationalRect l t w h)
-  where h = 0.9
+scratchpads = [
+  -- run htop in xterm, find it by title, use default floating window placement
+  NS "htop" "xterm -e htop" (title =? "htop") (customFloating $ W.RationalRect l t w h),
+
+  NS "term" (myTerminal ++ " -name scratchpadTerm") (title =? "scratchpadTerm") (customFloating $ W.RationalRect l t w h)
+  ]
+  where role = stringProperty "WM_WINDOW_ROLE"
+        h = 0.9
         w = 0.7
         t = 0.05
         l = 0.15
@@ -32,7 +38,9 @@ myUrgencyHook = NoUrgencyHook
 
 myManageHook = manageDocks
   <+> (className =? "X64" --> doFloat)
-  <+> manageScratchpad
+  <+> (className =? "XClock" --> doFloat)
+  <+> (title =? "popup-frame" --> doFloat <+> doF W.focusDown)
+  <+> namedScratchpadManageHook scratchpads
   <+> manageHook defaultConfig
 
 myTerminal = "urxvt -bg black"
@@ -128,7 +136,10 @@ main = do
         , ("M-S-w", spawn "scrot -s -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
         , ("M-p",   spawn "dmenu_run -fn 'Droid Sans Mono-16'")
-        , ("M-o",   scratchpadSpawnActionTerminal myTerminal)
+
+        , ("M-C-t", namedScratchpadAction scratchpads "htop")
+        , ("M-o",   namedScratchpadAction scratchpads "term")
+        
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
         , ("M-<L>", DO.moveTo Prev HiddenNonEmptyWS)
 
