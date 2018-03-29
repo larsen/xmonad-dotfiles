@@ -16,6 +16,7 @@ import XMonad.Layout.ToggleLayouts
 import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.SubLayouts
+import XMonad.Layout.Tabbed
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import XMonad.Util.NamedScratchpad
 import System.IO
@@ -37,15 +38,18 @@ scratchpads = [
 myUrgencyHook = NoUrgencyHook
 
 myManageHook = manageDocks
+  <+> (className =? "Xfce4-notifyd" --> doIgnore)
   <+> (className =? "X64" --> doFloat)
+  <+> (className =? "vlc" --> doFloat)
   <+> (className =? "XClock" --> doFloat)
   <+> (title =? "popup-frame" --> doFloat <+> doF W.focusDown)
+  <+> (title =? "CEPL" --> doFloat <+> doF W.focusDown)
   <+> namedScratchpadManageHook scratchpads
   <+> manageHook defaultConfig
 
 myTerminal = "urxvt -bg black"
 myFont = "Inconsolata-16"
-mySpacing = 8
+mySpacing = 2
 
 myGSConfig = defaultGSConfig { gs_cellwidth = 250 }
 
@@ -105,6 +109,16 @@ topBarTheme = def
     , decoHeight            = topbar
     }
 
+myTabTheme = def
+    { fontName              = myFont
+    , activeColor           = active
+    , inactiveColor         = base02
+    , activeBorderColor     = active
+    , inactiveBorderColor   = base02
+    , activeTextColor       = base03
+    , inactiveTextColor     = base00
+    }
+
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
 main = do
@@ -116,6 +130,7 @@ main = do
                    $ spacing mySpacing
                    $ smartBorders
                    $ addTopBar
+                   $ addTabs shrinkText myTabTheme
                    $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
@@ -150,7 +165,7 @@ main = do
         , ("M-C-u", withFocused (sendMessage . UnMerge))
         , ("M-C-,", onGroup W.focusUp')
         , ("M-C-.", onGroup W.focusDown')
-        
+
         -- GridSelect
         , ("M-g",   goToSelected myGSConfig)
         -- WindowBringer
@@ -158,6 +173,12 @@ main = do
         , ("M-S-b",   bringMenuArgs ["-fn", myFont])
         , ("M-C-<R>", DO.swapWith Next NonEmptyWS)
         , ("M-C-<L>", DO.swapWith Prev NonEmptyWS)
+        
+        , ("<XF86AudioRaiseVolume", spawn $ "pactl set-sink-volume 0 +10%")
+        , ("<XF86AudioLowerVolume>", spawn $ "pactl set-sink-volume 0 -10%")        
+        , ("<XF86AudioMute>", spawn $ "pactl set-sink-mute 0 toggle")        
+        , ("<XF86MonBrightnessUp>", spawn $ "xbacklight +10")
+        , ("<XF86MonBrightnessDown>", spawn $ "xbacklight -10")
         ] 
       ++ 
         map (\ (key, event) -> (key, spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player." ++ event))
