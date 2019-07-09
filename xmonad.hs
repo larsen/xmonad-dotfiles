@@ -167,7 +167,8 @@ main = do
         , ("M-C-.", onGroup W.focusDown')
 
         -- GridSelect
-        , ("M-g",   goToSelected myGSConfig)
+        -- , ("M-g",   goToSelected myGSConfig)
+        , ("M-g",   spawn "rofi -show window")
         -- WindowBringer
         , ("M-b",     gotoMenuArgs ["-fn", myFont])
         , ("M-S-b",   bringMenuArgs ["-fn", myFont])
