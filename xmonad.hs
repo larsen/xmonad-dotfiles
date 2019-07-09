@@ -174,7 +174,7 @@ main = do
         , ("M-C-<R>", DO.swapWith Next NonEmptyWS)
         , ("M-C-<L>", DO.swapWith Prev NonEmptyWS)
         
-        , ("<XF86AudioRaiseVolume", spawn $ "pactl set-sink-volume 0 +10%")
+        , ("<XF86AudioRaiseVolume>", spawn $ "pactl set-sink-volume 0 +10%")
         , ("<XF86AudioLowerVolume>", spawn $ "pactl set-sink-volume 0 -10%")        
         , ("<XF86AudioMute>", spawn $ "pactl set-sink-mute 0 toggle")        
         , ("<XF86MonBrightnessUp>", spawn $ "xbacklight +10")
