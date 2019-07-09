@@ -152,7 +152,7 @@ main = do
         , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
         , ("M-p",   spawn "dmenu_run -fn 'Droid Sans Mono-16'")
 
-        , ("M-C-t", namedScratchpadAction scratchpads "htop")
+        , ("M-C-t", namedScratchpadAction scratchpads "glances")
         , ("M-o",   namedScratchpadAction scratchpads "term")
         
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
