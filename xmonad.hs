@@ -150,7 +150,7 @@ main = do
         , ("M-S-s", spawn "scrot -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-w", spawn "scrot -s -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
-        , ("M-p",   spawn "dmenu_run -fn 'Droid Sans Mono-16'")
+        , ("M-p",   spawn "rofi -show run")
 
         , ("M-C-t", namedScratchpadAction scratchpads "glances")
         , ("M-o",   namedScratchpadAction scratchpads "term")
