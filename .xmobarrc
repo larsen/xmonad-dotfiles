@@ -1,7 +1,14 @@
-Config { -- font = "-*-fixed-*-*-*-*-14-*-*-*-*-*-*-*"
-         font = "xft:Inconsolata:size=16"
+Config { -- font = "-*-fixed-*-*-*-*-11-*-*-*-*-*-*-*"
+         font = "xft:Inconsolata:size=13"
+       , allDesktops = True
+       , alpha = 150
+       , additionalFonts = [ 
+         "xft:Siji:style=Regular"
+       , "xft:FontAwesome:style=Regular"
+       , "xft:Weather Icons:style=Regular"
+       ]
        , commands = [
-         Run Cpu [ "--template", "<fc=#ffffff><icon=.xmonad/icons/cpu.xbm/></fc>"
+         Run Cpu [ "--template", "<fn=2>\xf011</fn>"
                  , "-L", "3"
                  , "-H", "50"
                  , "--normal", "green"
@@ -10,8 +17,10 @@ Config { -- font = "-*-fixed-*-*-*-*-14-*-*-*-*-*-*-*"
 
        , Run StdinReader
 
+       , Run Weather "EDDT" ["-t","<fn=3>\xf055</fn> <tempC><fn=3>\xf03c</fn>","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+
        -- network activity monitor (dynamic interface resolution)
-       , Run DynNetwork     [ "--template" , "<dev>: <tx>kB/s|<rx>kB/s"
+       , Run DynNetwork     [ "--template" , "<fn=2>\xf106</fn> <tx>kB/s <fn=2>\xf107</fn> <rx>kB/s"
                             , "--Low"      , "1000"       -- units: kB/s
                             , "--High"     , "5000"       -- units: kB/s
                             , "--low"      , "darkgreen"
@@ -28,18 +37,22 @@ Config { -- font = "-*-fixed-*-*-*-*-14-*-*-*-*-*-*-*"
                             , "--high"     , "darkred"
                             ] 10
 
-       -- time and date indicator 
-       --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
-       , Run Date    "<fc=#ABABAB>%F (%a) %T</fc>" "date" 10
-       , Run Battery [ "-t","Battery <left>%"
+       , Run Date "<action=`gnome-calendar`><fn=2>\xf1ec</fn></action> %d.%m.%y / %A / %H:%M" "date" 10
+       , Run Battery [ "--template" ,"<fn=2>\xf241</fn> <left>%"
+                    -- "-t","Battery <left>%"
                      , "-L","50"
                      , "-H","75"
                      , "-h","green"
                      , "-n","yellow"
                      , "-l","red"
                      ] 10
-                     ] 
+       , Run Com "/home/stefano/bin/music-current" [] "mpd" 10
+
+       ]
        , position = TopW L 90
-       , template = "%StdinReader% | %cpu% | %memory% | %battery% | %dynnetwork% }{ %date%"
+       , template = "%StdinReader% ‧ %cpu% ‧ %memory% ‧ %battery% ‧ %dynnetwork% ‧ %mpd% }{ %EDDT% %date%"
+
+       , persistent = False
+       , pickBroadest = True
        }
 
