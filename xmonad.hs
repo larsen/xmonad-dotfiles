@@ -4,7 +4,7 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Actions.CycleWS
-import XMonad.Actions.GridSelect
+-- import XMonad.Actions.GridSelect
 import XMonad.Actions.WindowBringer
 import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Util.Run (spawnPipe)
@@ -12,28 +12,35 @@ import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Layout.Spacing
 import XMonad.Layout.NoBorders
 import XMonad.Layout.ThreeColumns
+import XMonad.Layout.Grid
 import XMonad.Layout.ToggleLayouts
 import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
+import XMonad.Layout.PerScreen
+import XMonad.Layout.Gaps
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import XMonad.Util.NamedScratchpad
 import System.IO
+import Data.List
 import qualified Data.Map as M
 import qualified XMonad.StackSet as W
 
 scratchpads = [
   -- run htop in xterm, find it by title, use default floating window placement
-  NS "htop" "xterm -e htop" (title =? "htop") (customFloating $ W.RationalRect l t w h),
-
-  NS "term" (myTerminal ++ " -name scratchpadTerm") (title =? "scratchpadTerm") (customFloating $ W.RationalRect l t w h)
+  NS "htop" "xterm -e htop" (title =? "htop")
+    (customFloating $ W.RationalRect l t w h),
+  NS "glances" "urxvt -e glances" (title =? "glances")
+    (customFloating $ W.RationalRect l t w h),
+  NS "term" (myTerminal ++ " -name scratchpadTerm") (title =? "scratchpadTerm")
+    (customFloating $ W.RationalRect l t w h)
   ]
   where role = stringProperty "WM_WINDOW_ROLE"
-        h = 0.9
-        w = 0.7
-        t = 0.05
-        l = 0.15
+        h = 9/10
+        w = 7/10
+        t = 5/100
+        l = 15/100
 
 myUrgencyHook = NoUrgencyHook
 
@@ -41,35 +48,41 @@ myManageHook = manageDocks
   <+> (className =? "Xfce4-notifyd" --> doIgnore)
   <+> (className =? "X64" --> doFloat)
   <+> (className =? "vlc" --> doFloat)
-  <+> (className =? "XClock" --> doFloat)
+  <+> (className =? "gimp-2.8" --> doFloat)
+  <+> (className =? "XClock" --> doIgnore)
   <+> (title =? "popup-frame" --> doFloat <+> doF W.focusDown)
   <+> (title =? "CEPL" --> doFloat <+> doF W.focusDown)
+  <+> (title =? "CLIM" --> doFloat <+> doF W.focusDown)
+  <+> (title =? "Listener" --> doFloat <+> doF W.focusDown)
+  <+> (title =? "Stella-App" --> doFloat <+> doF W.focusDown)
   <+> namedScratchpadManageHook scratchpads
-  <+> manageHook defaultConfig
+  <+> manageHook def
 
-myTerminal = "urxvt -bg black"
+-- myTerminal = "urxvt -bg black"
+myTerminal = "~/.local/kitty.app/bin/kitty"
 myFont = "Inconsolata-16"
-mySpacing = 2
+mySpacing = 10 
+myGaps = gaps [(U,18)]
 
-myGSConfig = defaultGSConfig { gs_cellwidth = 250 }
-
-myPPLayout l = case l of
-                 spacingTall   -> "[|]"
-                 spacingMirror -> "[-]"
-                 spacingTabbed -> "[_]"
-                 spacingFull   -> "[ ]"
-                 _             -> l
-  where mySpacingString = show mySpacing
-        spacingTall     = ("Spacing " ++ mySpacingString ++ " Tall")
-        spacingMirror   = ("Spacing " ++ mySpacingString ++ " Mirror Tall")
-        spacingTabbed   = ("Spacing " ++ mySpacingString ++ " Mirror Tabbed")
-        spacingFull     = ("Spacing " ++ mySpacingString ++ " Full")
+myPPLayout l
+  | isSuffixOf "Mirror Tall" l = "[-]" 
+  | isSuffixOf "Tall" l = "[|]" 
+  | isSuffixOf "smartTall" l = "[s]" 
+  | isSuffixOf "Full" l = "[ ]" 
+  | isSuffixOf "ThreeCol" l = "[‖]"
+  | isSuffixOf "Tabbed Tall" l = "[T]"
+  | isSuffixOf "NoFrillsDecoration" l = "[ ]"
+  | otherwise = (take 10 l)
 
 myLayouts = windowNavigation $ subTabbed $
-  (Tall 1 (3/100) (80/100))
-  ||| Mirror (Tall 1 (3/100) (60/100))
+  smartTall
+  ||| bottomSide
   ||| Full
   ||| ThreeColMid 1 (3/100) (2/3)
+  ||| Grid
+  where rightSide = (Tall 1 (3/100) (80/100))
+        bottomSide = Mirror (Tall 1 (3/100) (60/100))
+        smartTall = ifWider 1080 rightSide bottomSide
 
 base03  = "#002b36"
 base02  = "#073642"
@@ -122,34 +135,43 @@ myTabTheme = def
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
 main = do
-  xmproc <- spawnPipe "xmobar"
+  xmproc <- spawnPipe "/home/stefano/.local/bin/xmobar"
 
-  xmonad $ withUrgencyHook myUrgencyHook $ ewmh defaultConfig 
+  xmonad $ withUrgencyHook myUrgencyHook $ ewmh def
     { manageHook = myManageHook
     , layoutHook = avoidStruts
+                   $ addTopBar
+                   $ myGaps
                    $ spacing mySpacing
                    $ smartBorders
-                   $ addTopBar
                    $ addTabs shrinkText myTabTheme
                    $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
     , logHook = dynamicLogWithPP xmobarPP
       { ppOutput = hPutStrLn xmproc
       , ppTitle = xmobarColor "grey" "" . shorten 25
+      , ppCurrent = xmobarColor "yellow" ""
+      , ppVisible = xmobarColor "lightblue" ""
       , ppUrgent = xmobarColor "red" ""
       , ppSort = DO.getSortByOrder
       , ppLayout = myPPLayout
+      , ppOrder = \(ws:_:t:_) -> [ws,t]
+      , ppSep = "‧"
       }
     , terminal = myTerminal
+    , focusFollowsMouse = False
+    , clickJustFocuses = True
     , borderWidth = 0
     , modMask = mod4Mask
     }
     `additionalKeysP`
       ( [ ("M-S-z", spawn "xscreensaver-command -lock")
         , ("M-S-e", spawn "emacsclient -c")
-        , ("M-S-f", spawn "bash -c \"source ~/bin/functions.sh && toggle_touchpad\"")
+        , ("M-S-t", spawn "~/bin/capture.sh")
+        , ("M-S-a", spawn "~/bin/capture-anki.sh")
+        , ("M-S-p", spawn "~/bin/passmenu")
+        , ("M-v",   spawn "clip2capture")
         , ("M-S-s", spawn "scrot -e 'mv $f ~/Pictures/screenshots/'")
         , ("M-S-w", spawn "scrot -s -e 'mv $f ~/Pictures/screenshots/'")
-        , ("M-S-t", spawn "/usr/bin/curl --user tiro:JF4NabjScClXkgx 192.168.20.9/tiro.py")
         , ("M-p",   spawn "rofi -show run")
 
         , ("M-C-t", namedScratchpadAction scratchpads "glances")
@@ -167,7 +189,6 @@ main = do
         , ("M-C-.", onGroup W.focusDown')
 
         -- GridSelect
-        -- , ("M-g",   goToSelected myGSConfig)
         , ("M-g",   spawn "rofi -show window")
         -- WindowBringer
         , ("M-b",     gotoMenuArgs ["-fn", myFont])
