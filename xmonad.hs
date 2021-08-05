@@ -18,12 +18,15 @@ import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
+-- Order screens by physical location
+import XMonad.Actions.PhysicalScreens
 import XMonad.Layout.PerScreen
 import XMonad.Layout.Gaps
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import XMonad.Util.NamedScratchpad
 import System.IO
 import Data.List
+import Data.Default
 import qualified Data.Map as M
 import qualified XMonad.StackSet as W
 
@@ -201,7 +204,20 @@ main = do
         , ("<XF86AudioMute>", spawn $ "pactl set-sink-mute 0 toggle")        
         , ("<XF86MonBrightnessUp>", spawn $ "xbacklight +10")
         , ("<XF86MonBrightnessDown>", spawn $ "xbacklight -10")
-        ] 
+        ]
+      ++
+      -- https://xiangji.me/2018/11/19/my-xmonad-configuration/#xmonadactionsphysicalscreens
+      --
+      -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
+      -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
+      --
+      --   [((modm .|. mask, key), f sc)
+      --  | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+      --  , (f, mask) <- [(viewScreen def, 0), (sendToScreen def, shiftMask)]]
+        [ ("M-w", viewScreen def 0)
+        , ("M-e", viewScreen def 1)
+        , ("M-r", viewScreen def 2)
+        ]
       ++ 
         map (\ (key, event) -> (key, spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player." ++ event))
         [ ("<XF86AudioPlay>", "PlayPause")
