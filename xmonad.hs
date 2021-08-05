@@ -77,10 +77,20 @@ myPPLayout l
   | isSuffixOf "NoFrillsDecoration" l = "[ ]"
   | otherwise = (take 10 l)
 
+myTabTheme = def
+    { fontName              = myFont
+    , activeColor           = active
+    , inactiveColor         = base02
+    , activeBorderColor     = active
+    , inactiveBorderColor   = base02
+    , activeTextColor       = base03
+    , inactiveTextColor     = base00
+    }
+
 myLayouts = windowNavigation $ subTabbed $
   smartTall
   ||| bottomSide
-  ||| Full
+  ||| tabbed shrinkText myTabTheme
   ||| ThreeColMid 1 (3/100) (2/3)
   ||| Grid
   where rightSide = (Tall 1 (3/100) (80/100))
@@ -125,15 +135,6 @@ topBarTheme = def
     , decoHeight            = topbar
     }
 
-myTabTheme = def
-    { fontName              = myFont
-    , activeColor           = active
-    , inactiveColor         = base02
-    , activeBorderColor     = active
-    , inactiveBorderColor   = base02
-    , activeTextColor       = base03
-    , inactiveTextColor     = base00
-    }
 
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
