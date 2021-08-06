@@ -139,7 +139,7 @@ topBarTheme = def
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
 main = do
-  xmproc <- spawnPipe "/home/stefano/.local/bin/xmobar"
+  xmproc <- spawnPipe "/home/stefano/.local/bin/xmobar -x 0"
 
   xmonad $ withUrgencyHook myUrgencyHook $ ewmh def
     { manageHook = myManageHook
