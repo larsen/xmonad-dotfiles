@@ -139,28 +139,15 @@ topBarTheme = def
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
 main = do
-  xmproc <- spawnPipe "/home/stefano/.local/bin/xmobar -x 0"
 
-  xmonad $ withUrgencyHook myUrgencyHook $ ewmh def
+  xmonad $ docks $ withUrgencyHook myUrgencyHook $ ewmh def
     { manageHook = myManageHook
     , layoutHook = avoidStruts
                    $ addTopBar
-                   $ myGaps
                    $ spacing mySpacing
                    $ smartBorders
                    $ addTabs shrinkText myTabTheme
                    $ toggleLayouts Full myLayouts -- layoutHook defaultConfig
-    , logHook = dynamicLogWithPP xmobarPP
-      { ppOutput = hPutStrLn xmproc
-      , ppTitle = xmobarColor "grey" "" . shorten 25
-      , ppCurrent = xmobarColor "yellow" ""
-      , ppVisible = xmobarColor "lightblue" ""
-      , ppUrgent = xmobarColor "red" ""
-      , ppSort = DO.getSortByOrder
-      , ppLayout = myPPLayout
-      , ppOrder = \(ws:_:t:_) -> [ws,t]
-      , ppSep = "‧"
-      }
     , terminal = myTerminal
     , focusFollowsMouse = False
     , clickJustFocuses = True
