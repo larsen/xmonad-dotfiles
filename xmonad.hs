@@ -10,7 +10,7 @@ import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Util.Run (spawnPipe)
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Layout.Spacing
-import XMonad.Layout.NoBorders
+import XMonad.Layout.NoBorders ( smartBorders, lessBorders, SetsAmbiguous ( hiddens ) )
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.Grid
 import XMonad.Layout.ToggleLayouts
@@ -24,6 +24,7 @@ import XMonad.Layout.PerScreen
 import XMonad.Layout.Gaps
 import XMonad.Util.Scratchpad (scratchpadManageHook, scratchpadSpawnActionTerminal)
 import XMonad.Util.NamedScratchpad
+-- import qualified XMonad.Util.Hacks as Hacks
 import System.IO
 import Data.List
 import Data.Default
@@ -34,8 +35,12 @@ scratchpads = [
   -- run htop in xterm, find it by title, use default floating window placement
   NS "htop" "xterm -e htop" (title =? "htop")
     (customFloating $ W.RationalRect l t w h),
+  NS "pulsemixer" "urxvt -e pulsemixer" (title =? "pulsemixer")
+    (customFloating $ W.RationalRect l t w h),
   NS "glances" "urxvt -e glances" (title =? "glances")
     (customFloating $ W.RationalRect l t w h),
+  -- NS "spotify" "spotify" (className =? "spotify")
+  --   (customFloating $ W.RationalRect l t w h),
   NS "term" (myTerminal ++ " -name scratchpadTerm") (title =? "scratchpadTerm")
     (customFloating $ W.RationalRect l t w h)
   ]
@@ -51,8 +56,12 @@ myManageHook = manageDocks
   <+> (className =? "Xfce4-notifyd" --> doIgnore)
   <+> (className =? "X64" --> doFloat)
   <+> (className =? "vlc" --> doFloat)
+  <+> (title =? "Ediff" --> doFloat)
   <+> (className =? "gimp-2.8" --> doFloat)
   <+> (className =? "XClock" --> doIgnore)
+  <+> (className =? "Xephyr" --> doIgnore)
+  <+> (title =? "Synacor Debugger" --> doFloat)
+  <+> (title =? "Melody" --> doFloat)
   <+> (title =? "popup-frame" --> doFloat <+> doF W.focusDown)
   <+> (title =? "CEPL" --> doFloat <+> doF W.focusDown)
   <+> (title =? "CLIM" --> doFloat <+> doF W.focusDown)
@@ -64,18 +73,18 @@ myManageHook = manageDocks
 -- myTerminal = "urxvt -bg black"
 myTerminal = "~/.local/kitty.app/bin/kitty"
 myFont = "Inconsolata-16"
-mySpacing = 10 
-myGaps = gaps [(U,18)]
+mySpacing = 5
+myGaps = gaps [(U,8)]
 
 myPPLayout l
-  | isSuffixOf "Mirror Tall" l = "[-]" 
-  | isSuffixOf "Tall" l = "[|]" 
-  | isSuffixOf "smartTall" l = "[s]" 
-  | isSuffixOf "Full" l = "[ ]" 
-  | isSuffixOf "ThreeCol" l = "[‖]"
-  | isSuffixOf "Tabbed Tall" l = "[T]"
-  | isSuffixOf "NoFrillsDecoration" l = "[ ]"
-  | otherwise = (take 10 l)
+  | "Mirror Tall" `isSuffixOf` l = "[-]"
+  | "Tall" `isSuffixOf` l = "[|]"
+  | "smartTall" `isSuffixOf` l = "[s]"
+  | "Full" `isSuffixOf` l = "[ ]"
+  | "ThreeCol" `isSuffixOf` l = "[‖]"
+  | "Tabbed Tall" `isSuffixOf` l = "[T]"
+  | "NoFrillsDecoration" `isSuffixOf` l = "[ ]"
+  | otherwise = take 10 l
 
 myTabTheme = def
     { fontName              = myFont
@@ -93,7 +102,7 @@ myLayouts = windowNavigation $ subTabbed $
   ||| tabbed shrinkText myTabTheme
   ||| ThreeColMid 1 (3/100) (2/3)
   ||| Grid
-  where rightSide = (Tall 1 (3/100) (80/100))
+  where rightSide = Tall 1 (3 / 100) (80 / 100)
         bottomSide = Mirror (Tall 1 (3/100) (60/100))
         smartTall = ifWider 1080 rightSide bottomSide
 
@@ -135,12 +144,9 @@ topBarTheme = def
     , decoHeight            = topbar
     }
 
-
 addTopBar = noFrillsDeco shrinkText topBarTheme
 
-main = do
-
-  xmonad $ docks $ withUrgencyHook myUrgencyHook $ ewmh def
+main = xmonad $ docks $ withUrgencyHook myUrgencyHook $ ewmh def
     { manageHook = myManageHook
     , layoutHook = avoidStruts
                    $ addTopBar
@@ -151,7 +157,9 @@ main = do
     , terminal = myTerminal
     , focusFollowsMouse = False
     , clickJustFocuses = True
-    , borderWidth = 0
+    , borderWidth = 1
+    , focusedBorderColor = blue
+    , normalBorderColor = "#000000"
     , modMask = mod4Mask
     }
     `additionalKeysP`
@@ -167,7 +175,8 @@ main = do
 
         , ("M-C-t", namedScratchpadAction scratchpads "glances")
         , ("M-o",   namedScratchpadAction scratchpads "term")
-        
+        , ("M-C-m", namedScratchpadAction scratchpads "pulsemixer")
+
         , ("M-<R>", DO.moveTo Next HiddenNonEmptyWS)
         , ("M-<L>", DO.moveTo Prev HiddenNonEmptyWS)
 
@@ -179,6 +188,9 @@ main = do
         , ("M-C-,", onGroup W.focusUp')
         , ("M-C-.", onGroup W.focusDown')
 
+        , ("M-<F1>", spawn "sxiv -q -t -r ~/Pictures/wallpapers")
+        , ("M-<F2>", spawn "urxvt -e ~/bin/db")
+
         -- GridSelect
         , ("M-g",   spawn "rofi -show window")
         -- WindowBringer
@@ -187,11 +199,11 @@ main = do
         , ("M-C-<R>", DO.swapWith Next NonEmptyWS)
         , ("M-C-<L>", DO.swapWith Prev NonEmptyWS)
 
-        , ("<XF86AudioRaiseVolume>", spawn $ "pactl set-sink-volume @DEFAULT_SINK@ +10%")
-        , ("<XF86AudioLowerVolume>", spawn $ "pactl set-sink-volume @DEFAULT_SINK@ -10%")
-        , ("<XF86AudioMute>", spawn $ "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-        , ("<XF86MonBrightnessUp>", spawn $ "xbacklight +10")
-        , ("<XF86MonBrightnessDown>", spawn $ "xbacklight -10")
+        , ("<XF86AudioRaiseVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+        , ("<XF86AudioLowerVolume>", spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+        , ("<XF86AudioMute>", spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+        , ("<XF86MonBrightnessUp>", spawn "xbacklight +10")
+        , ("<XF86MonBrightnessDown>", spawn "xbacklight -10")
         ]
       ++
       -- https://xiangji.me/2018/11/19/my-xmonad-configuration/#xmonadactionsphysicalscreens
